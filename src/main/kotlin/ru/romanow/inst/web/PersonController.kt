@@ -10,18 +10,17 @@ import io.restassured.http.ContentType
 import io.restassured.parsing.Parser
 import io.restassured.response.ResponseBodyExtractionOptions
 import io.restassured.specification.RequestSpecification
+import org.apache.http.HttpHeaders
 import org.apache.http.HttpStatus
 import org.hamcrest.Matchers
+import ru.romanow.inst.model.PersonRequest
 import ru.romanow.inst.model.PersonResponse
-
-inline fun <reified T> ResponseBodyExtractionOptions.to(): T {
-    return this.`as`(T::class.java)
-}
+import ru.romanow.inst.model.PersonResponseList
 
 class PersonController {
     private val requestSpecification: RequestSpecification = RequestSpecBuilder()
         .setBaseUri("https://rsoi-person-service.herokuapp.com")
-        .setBasePath("/calc")
+        .setBasePath("/persons")
         .setAccept(ContentType.JSON)
         .log(LogDetail.ALL)
         .build()
@@ -29,7 +28,6 @@ class PersonController {
     init {
         RestAssured.defaultParser = Parser.JSON
         RestAssured.responseSpecification = ResponseSpecBuilder()
-            .expectContentType(ContentType.JSON)
             .expectResponseTime(Matchers.lessThan(15000L))
             .build()
     }
@@ -38,18 +36,42 @@ class PersonController {
     fun person(id: Int): PersonResponse =
         given(requestSpecification)
             .pathParam("id", id)
-            .get("/persons/{id}")
+            .get("/{id}")
             .then()
             .statusCode(HttpStatus.SC_OK)
+            .contentType(ContentType.JSON)
             .extract()
-            .to()
+            .body()
+            .`as`(PersonResponse::class.java)
 
     @Step("List persons")
     fun listPersons(): List<PersonResponse> =
         given(requestSpecification)
-            .get("/persons")
+            .get()
             .then()
             .statusCode(HttpStatus.SC_OK)
+            .contentType(ContentType.JSON)
             .extract()
-            .to()
+            .body()
+            .`as`(PersonResponseList::class.java)
+
+    @Step("Create person")
+    fun createPerson(request: PersonRequest): String =
+        given(requestSpecification)
+            .body(request)
+            .contentType(ContentType.JSON)
+            .post()
+            .then()
+            .statusCode(HttpStatus.SC_CREATED)
+            .extract()
+            .header(HttpHeaders.LOCATION)
+            .toString()
+
+    @Step("Delete person")
+    fun deletePerson(id: Int) =
+        given(requestSpecification)
+            .pathParam("id", id)
+            .get("/{id}")
+            .then()
+            .statusCode(HttpStatus.SC_OK)
 }

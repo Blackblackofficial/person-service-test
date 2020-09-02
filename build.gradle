@@ -7,8 +7,9 @@ plugins {
 
 ext {
     junitVersion = "5.4.0"
-    allureVersion = "2.13.5"
+    allureVersion = "2.8.1"
     restAssuredVersion = "4.3.1"
+    jacksonKotlinVersion = "2.11.2"
 }
 
 sourceCompatibility = 1.11
@@ -22,7 +23,11 @@ idea {
 }
 
 allure {
-    version = "${allureVersion}"
+    autoconfigure = true
+    version = "$allureVersion"
+    useJUnit5 {
+        version = "$allureVersion"
+    }
 }
 
 repositories {
@@ -34,10 +39,12 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinVersion"
 
     implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
     implementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
     implementation "io.qameta.allure:allure-java-commons:${allureVersion}"
+    implementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
@@ -49,4 +56,5 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    jvmArgs "-noverify"
 }
