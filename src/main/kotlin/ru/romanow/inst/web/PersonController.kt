@@ -1,6 +1,5 @@
 package ru.romanow.inst.web
 
-import io.qameta.allure.Step
 import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import io.restassured.builder.RequestSpecBuilder
@@ -32,7 +31,6 @@ class PersonController {
             .build()
     }
 
-    @Step("Get person")
     fun person(id: Int): PersonResponse =
         given(requestSpecification)
             .pathParam("id", id)
@@ -44,7 +42,6 @@ class PersonController {
             .body()
             .`as`(PersonResponse::class.java)
 
-    @Step("List persons")
     fun listPersons(): List<PersonResponse> =
         given(requestSpecification)
             .get()
@@ -55,7 +52,6 @@ class PersonController {
             .body()
             .`as`(PersonResponseList::class.java)
 
-    @Step("Create person")
     fun createPerson(request: PersonRequest): String =
         given(requestSpecification)
             .body(request)
@@ -67,7 +63,6 @@ class PersonController {
             .header(HttpHeaders.LOCATION)
             .toString()
 
-    @Step("Delete person")
     fun deletePerson(id: Int) =
         given(requestSpecification)
             .pathParam("id", id)
