@@ -7,7 +7,6 @@ import io.restassured.builder.ResponseSpecBuilder
 import io.restassured.filter.log.LogDetail
 import io.restassured.http.ContentType
 import io.restassured.parsing.Parser
-import io.restassured.response.ResponseBodyExtractionOptions
 import io.restassured.specification.RequestSpecification
 import org.apache.http.HttpHeaders
 import org.apache.http.HttpStatus
@@ -15,16 +14,18 @@ import org.hamcrest.Matchers
 import ru.romanow.inst.model.PersonRequest
 import ru.romanow.inst.model.PersonResponse
 import ru.romanow.inst.model.PersonResponseList
+import java.lang.System.getProperty
 
 class PersonController {
     private val requestSpecification: RequestSpecification = RequestSpecBuilder()
-        .setBaseUri("https://rsoi-person-service.herokuapp.com")
+        .setBaseUri(getProperty("targetUrl"))
         .setBasePath("/persons")
         .setAccept(ContentType.JSON)
         .log(LogDetail.ALL)
         .build()
 
     init {
+
         RestAssured.defaultParser = Parser.JSON
         RestAssured.responseSpecification = ResponseSpecBuilder()
             .expectResponseTime(Matchers.lessThan(15000L))
@@ -63,10 +64,11 @@ class PersonController {
             .header(HttpHeaders.LOCATION)
             .toString()
 
-    fun deletePerson(id: Int) =
+    fun deletePerson(id: Int) {
         given(requestSpecification)
             .pathParam("id", id)
             .get("/{id}")
             .then()
             .statusCode(HttpStatus.SC_OK)
+    }
 }
